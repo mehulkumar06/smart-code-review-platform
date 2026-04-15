@@ -78,8 +78,10 @@ function App() {
       setLoading(true);
       setResult(null);
 
-      const response = await axios.post(
-  "https://smart-code-review-platform.onrender.com/api/github/analyze",
+      const API_URL = process.env.REACT_APP_API_URL;
+
+const response = await axios.post(
+  `${API_URL}/api/github/analyze`,
   { repoUrl }
 );
       setHistory((prev) => [response.data, ...prev]);
