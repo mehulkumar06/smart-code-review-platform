@@ -5,19 +5,21 @@ const githubRoutes = require("./routes/githubRoutes");
 
 const app = express();
 
-const allowedOrigins = [
-  "http://localhost:3000",
-  "http://localhost:5173",
-  "https://smart-code-review-platform.vercel.app"
-];
-
 app.use(cors({
-  origin: allowedOrigins,
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  allowedHeaders: ["Content-Type", "Authorization"]
+  origin: [
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "https://smart-code-review-platform.vercel.app",
+    "https://smart-code-review-platform-55hglh2s9-mehulkumar06s-projects.vercel.app"
+  ],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  credentials: true
 }));
 
 app.use(express.json());
+
+// ❌ REMOVE THIS LINE COMPLETELY
+// app.options("*", cors());
 
 app.get("/", (req, res) => {
   res.json({
