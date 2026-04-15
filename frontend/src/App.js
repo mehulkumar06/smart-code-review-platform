@@ -79,7 +79,7 @@ function App() {
       setResult(null);
 
       const response = await axios.post(
-  `${process.env.REACT_APP_API_URL}/api/github/analyze`,
+  "https://smart-code-review-platform.onrender.com/api/github/analyze",
   { repoUrl }
 );
       setHistory((prev) => [response.data, ...prev]);
