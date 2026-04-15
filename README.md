@@ -17,7 +17,7 @@ Backend: _To be deployed_
 
 ## 🏠 Homepage
 
-![Homepage](screenshots/home.png)
+![Homepage](screenshots/home.png) 
 
 ---
 
