@@ -69,6 +69,10 @@ function App() {
   const [chatMessages, setChatMessages] = useState([]);
   const [chatInput, setChatInput] = useState("");
   const [chatLoading, setChatLoading] = useState(false);
+  const [compareMode, setCompareMode] = useState(false);
+const [compareUrl, setCompareUrl] = useState("");
+const [compareResult, setCompareResult] = useState(null);
+const [compareLoading, setCompareLoading] = useState(false);
   const [openSections, setOpenSections] = useState({
     ai: true,
     files: true,
@@ -122,7 +126,7 @@ function App() {
       setResult(null);
       setChatMessages([]);
       const response = await axios.post(
-        "http://localhost:5000/api/github/analyze",
+        "https://smart-code-review-platform.onrender.com/api/github/analyze",
         { repoUrl }
       );
       setHistory((prev) => [response.data, ...prev]);
@@ -172,7 +176,7 @@ function App() {
     setChatLoading(true);
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/github/chat",
+        "https://smart-code-review-platform.onrender.com/api/github/chat",
         {
           question: chatInput,
           repoContext: {
@@ -197,6 +201,22 @@ function App() {
       setChatLoading(false);
     }
   };
+
+  const analyzeCompareRepo = async () => {
+  try {
+    setCompareLoading(true);
+    setCompareResult(null);
+    const response = await axios.post(
+      "http://localhost:5000/api/github/analyze",
+      { repoUrl: compareUrl }
+    );
+    setCompareResult(response.data);
+  } catch (error) {
+    setToast({ type: "error", message: "Failed to analyze second repository" });
+  } finally {
+    setCompareLoading(false);
+  }
+};
 
   const toggleBookmark = (repoData) => {
     setBookmarks((prev) => {
@@ -255,6 +275,24 @@ function App() {
             <h1 style={{ fontSize: "22px", margin: 0 }}>Smart Code Review</h1>
             <p style={{ fontSize: "13px", color: theme.subText, marginTop: 4 }}>Analyze GitHub repos using AI</p>
           </div>
+
+<button
+  onClick={() => { setCompareMode(!compareMode); setCompareResult(null); setCompareUrl(""); }}
+  style={{
+    padding: "8px 12px",
+    borderRadius: "8px",
+    border: `1px solid ${compareMode ? "#38bdf8" : theme.border}`,
+    background: compareMode ? (darkMode ? "#0c4a6e" : "#e0f2fe") : theme.card,
+    color: compareMode ? "#38bdf8" : theme.text,
+    cursor: "pointer",
+    fontSize: "13px",
+    marginRight: "8px",
+    fontWeight: compareMode ? 600 : 400,
+  }}
+>
+  {compareMode ? "✕ Exit Compare" : "🔗 Compare"}
+</button>
+
           <button
             onClick={() => setDarkMode(!darkMode)}
             style={{ padding: "8px 12px", borderRadius: "8px", border: `1px solid ${theme.border}`, background: theme.card, color: theme.text, cursor: "pointer", fontSize: "13px" }}
@@ -285,6 +323,27 @@ function App() {
           </button>
         </div>
 
+        {/* COMPARE INPUT */}
+{compareMode && (
+  <div style={{ display: "flex", gap: "10px", flexDirection: isMobile ? "column" : "row", marginTop: "10px" }}>
+    <input
+      value={compareUrl}
+      onChange={(e) => setCompareUrl(e.target.value)}
+      placeholder="https://github.com/user/repo2 (second repo to compare)"
+      style={{ flex: 1, padding: "10px 12px", borderRadius: "8px", border: `1px solid #38bdf8`, background: darkMode ? "#0b1220" : "#ffffff", color: theme.text, fontSize: "14px", outline: "none" }}
+      onFocus={(e) => { e.target.style.boxShadow = "0 0 0 3px rgba(56,189,248,0.15)"; }}
+      onBlur={(e) => { e.target.style.boxShadow = "none"; }}
+    />
+    <button
+      onClick={analyzeCompareRepo}
+      disabled={compareLoading || !compareUrl.trim()}
+      style={{ padding: "10px 14px", borderRadius: "8px", border: "1px solid #38bdf8", background: "#38bdf8", color: "#0f172a", cursor: compareLoading || !compareUrl.trim() ? "not-allowed" : "pointer", fontSize: "14px", fontWeight: "500" }}
+    >
+      {compareLoading ? "Analyzing..." : "Compare"}
+    </button>
+  </div>
+)}
+
         {/* LOADING */}
         {loading && (
           <div>
@@ -296,7 +355,105 @@ function App() {
 
         {/* RESULT */}
         {result && (
-          <div id="report" style={{ marginTop: 25 }}>
+  <div id="report" style={{ marginTop: 25 }}>
+
+    {/* ── COMPARE SIDE BY SIDE ── */}
+    {compareMode && compareResult && (
+      <div style={{ marginBottom: "20px" }}>
+
+        {/* Compare Header */}
+        <div style={{ fontSize: "14px", fontWeight: 700, marginBottom: "12px", color: "#38bdf8" }}>
+          🔗 Comparison Results
+        </div>
+
+        {/* Side by Side Cards */}
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "12px", marginBottom: "16px" }}>
+
+          {/* Repo 1 */}
+          <Card theme={theme} style={{ border: "2px solid #38bdf8" }}>
+            <div style={{ fontSize: "11px", color: "#38bdf8", fontWeight: 600, marginBottom: "6px" }}>REPO 1</div>
+            <div style={{ fontWeight: 600, fontSize: "14px", marginBottom: "4px" }}>{result.repo}</div>
+            <div style={{ fontSize: "12px", color: theme.subText, marginBottom: "10px" }}>{result.language} • ⭐ {result.stars}</div>
+            <ScoreBar label="Documentation" value={result.documentationScore} color="#38bdf8" theme={theme} />
+            <ScoreBar label="Structure" value={result.structureScore} color="#22c55e" theme={theme} />
+            <ScoreBar label="Code Quality" value={result.codeScore} color="#f59e0b" theme={theme} />
+            <div style={{ marginTop: "10px", textAlign: "center" }}>
+              <span style={{ fontSize: "28px", fontWeight: 700, color: result.overallScore >= 80 ? "#16a34a" : result.overallScore >= 50 ? "#ca8a04" : "#dc2626" }}>
+                {result.overallScore}
+              </span>
+              <span style={{ fontSize: "13px", color: theme.subText }}>/100</span>
+            </div>
+          </Card>
+
+          {/* Repo 2 */}
+          <Card theme={theme} style={{ border: "2px solid #22c55e" }}>
+            <div style={{ fontSize: "11px", color: "#22c55e", fontWeight: 600, marginBottom: "6px" }}>REPO 2</div>
+            <div style={{ fontWeight: 600, fontSize: "14px", marginBottom: "4px" }}>{compareResult.repo}</div>
+            <div style={{ fontSize: "12px", color: theme.subText, marginBottom: "10px" }}>{compareResult.language} • ⭐ {compareResult.stars}</div>
+            <ScoreBar label="Documentation" value={compareResult.documentationScore} color="#38bdf8" theme={theme} />
+            <ScoreBar label="Structure" value={compareResult.structureScore} color="#22c55e" theme={theme} />
+            <ScoreBar label="Code Quality" value={compareResult.codeScore} color="#f59e0b" theme={theme} />
+            <div style={{ marginTop: "10px", textAlign: "center" }}>
+              <span style={{ fontSize: "28px", fontWeight: 700, color: compareResult.overallScore >= 80 ? "#16a34a" : compareResult.overallScore >= 50 ? "#ca8a04" : "#dc2626" }}>
+                {compareResult.overallScore}
+              </span>
+              <span style={{ fontSize: "13px", color: theme.subText }}>/100</span>
+            </div>
+          </Card>
+
+        </div>
+
+        {/* Winner Banner */}
+        <div style={{ padding: "12px 16px", borderRadius: "10px", background: darkMode ? "#1f2937" : "#f0fdf4", border: "1px solid #22c55e", fontSize: "13px", color: theme.text, textAlign: "center" }}>
+          {result.overallScore > compareResult.overallScore ? (
+            <span>🏆 <strong>{result.repo}</strong> wins with a score of <strong>{result.overallScore}</strong> vs {compareResult.overallScore}</span>
+          ) : result.overallScore < compareResult.overallScore ? (
+            <span>🏆 <strong>{compareResult.repo}</strong> wins with a score of <strong>{compareResult.overallScore}</strong> vs {result.overallScore}</span>
+          ) : (
+            <span>🤝 It's a tie! Both repos scored <strong>{result.overallScore}</strong></span>
+          )}
+        </div>
+
+        {/* Stat Comparison Table */}
+        <Card theme={theme} style={{ marginTop: "12px" }}>
+          <div style={{ fontSize: "14px", fontWeight: 600, marginBottom: "12px" }}>📊 Head to Head</div>
+          <div style={{ fontSize: "13px" }}>
+            {[
+              { label: "Overall Score", v1: result.overallScore, v2: compareResult.overallScore },
+              { label: "Documentation", v1: result.documentationScore, v2: compareResult.documentationScore },
+              { label: "Structure", v1: result.structureScore, v2: compareResult.structureScore },
+              { label: "Code Quality", v1: result.codeScore, v2: compareResult.codeScore },
+              { label: "Stars", v1: result.stars, v2: compareResult.stars },
+              { label: "Total Files", v1: result.totalFiles, v2: compareResult.totalFiles },
+              { label: "Issues Found", v1: result.issues.length, v2: compareResult.issues.length, lowerIsBetter: true },
+            ].map((row, idx) => {
+              const v1Wins = row.lowerIsBetter ? row.v1 < row.v2 : row.v1 > row.v2;
+              const v2Wins = row.lowerIsBetter ? row.v2 < row.v1 : row.v2 > row.v1;
+              return (
+                <div key={idx} style={{ display: "grid", gridTemplateColumns: "1fr 1.5fr 1fr", gap: "8px", alignItems: "center", padding: "8px 0", borderBottom: `1px solid ${theme.border}` }}>
+                  <div style={{ fontWeight: v1Wins ? 700 : 400, color: v1Wins ? "#38bdf8" : theme.text, textAlign: "right" }}>
+                    {v1Wins && "🏆 "}{row.v1}
+                  </div>
+                  <div style={{ textAlign: "center", fontSize: "12px", color: theme.subText }}>{row.label}</div>
+                  <div style={{ fontWeight: v2Wins ? 700 : 400, color: v2Wins ? "#22c55e" : theme.text }}>
+                    {v2Wins && "🏆 "}{row.v2}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </Card>
+
+      </div>
+    )}
+
+    {/* Compare loading state */}
+    {compareMode && compareLoading && (
+      <div style={{ marginBottom: "20px" }}>
+        <p style={{ color: theme.subText, fontSize: "13px" }}>Analyzing second repository...</p>
+        <SkeletonCard theme={theme} />
+      </div>
+    )}
 
             {/* ── REPO SUMMARY CARD ── */}
             <Card theme={theme}>
