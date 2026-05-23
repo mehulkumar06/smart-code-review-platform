@@ -1,25 +1,33 @@
-const { Queue, Worker, QueueEvents } = require("bullmq");
+const { Queue, QueueEvents } = require("bullmq");
 
-const connection = {
-    host: process.env.REDIS_HOST || "127.0.0.1",
-    port: process.env.REDIS_PORT || 6379,
-};
+// ── Redis Connection (supports Railway REDIS_URL and local host/port) ──
+function getRedisConnection() {
+    if (process.env.REDIS_URL) {
+        return { url: process.env.REDIS_URL };
+    }
+    return {
+        host: process.env.REDIS_HOST || "127.0.0.1",
+        port: parseInt(process.env.REDIS_PORT) || 6379,
+    };
+}
 
-// ── Create the PR Review Queue ───────────────────────────────────
+const connection = getRedisConnection();
+
+// ── Create the PR Review Queue ────────────────────────────────────────
 const prReviewQueue = new Queue("pr-review", {
     connection,
     defaultJobOptions: {
-        attempts:  3,        // retry 3 times if fails
+        attempts: 3,
         backoff: {
             type:  "exponential",
-            delay: 5000,     // wait 5s, then 10s, then 20s
+            delay: 5000,
         },
-        removeOnComplete: 100,  // keep last 100 completed jobs
-        removeOnFail:     200,  // keep last 200 failed jobs
+        removeOnComplete: 100,
+        removeOnFail:     200,
     },
 });
 
-// ── Queue Events (for logging) ───────────────────────────────────
+// ── Queue Events (for logging) ────────────────────────────────────────
 const queueEvents = new QueueEvents("pr-review", { connection });
 
 queueEvents.on("completed", ({ jobId }) => {
@@ -34,7 +42,7 @@ queueEvents.on("active", ({ jobId }) => {
     console.log(`⚙️  Job ${jobId} started processing`);
 });
 
-// ── Add a PR Review Job to Queue ─────────────────────────────────
+// ── Add a PR Review Job to Queue ──────────────────────────────────────
 async function addPRReviewJob(payload) {
     const job = await prReviewQueue.add(
         "review-pr",
@@ -46,18 +54,5 @@ async function addPRReviewJob(payload) {
     console.log(`📥 Job queued: ${job.id}`);
     return job;
 }
-
-// Support both REDIS_URL (Railway) and host/port (local)
-function getRedisConnection() {
-    if (process.env.REDIS_URL) {
-        return { url: process.env.REDIS_URL };
-    }
-    return {
-        host: process.env.REDIS_HOST || "127.0.0.1",
-        port: process.env.REDIS_PORT || 6379,
-    };
-}
-
-const connection = getRedisConnection();
 
 module.exports = { prReviewQueue, addPRReviewJob };
