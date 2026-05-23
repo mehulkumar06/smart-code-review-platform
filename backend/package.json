@@ -4,11 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node src/server.js",
-    "worker": "node src/worker.js",
-    "start:worker": "node src/worker.js",
-    "dev": "concurrently \"npm run start\" \"npm run worker\""
-  },
+    "start": "node src/index.js",
+    "dev": "concurrently \"node src/server.js\" \"node src/worker.js\""
+},
   "keywords": [],
   "author": "",
   "license": "ISC",
