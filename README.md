@@ -17,19 +17,19 @@ Backend: _To be deployed_
 
 ## 🏠 Homepage
 
-![Homepage](screenshots/home.png) 
+![Homepage]() 
 
 ---
 
 ## 📊 Repository Analysis Dashboard
 
-![Analysis](screenshots/analysis.png)
+![Analysis]()
 
 ---
 
 ## 📁 File Insights
 
-![Insights](screenshots/insights.png)
+![Insights]()
 
 ---
 
