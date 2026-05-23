@@ -5,10 +5,10 @@
   "main": "index.js",
   "scripts": {
     "start": "node src/server.js",
-    "start:worker": "node src/worker.js",
     "worker": "node src/worker.js",
-    "dev": "concurrently \"node src/server.js\" \"node src/worker.js\""
-},
+    "start:worker": "node src/worker.js",
+    "dev": "concurrently \"npm run start\" \"npm run worker\""
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
