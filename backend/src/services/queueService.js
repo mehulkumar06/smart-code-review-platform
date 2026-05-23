@@ -2,6 +2,7 @@ const { Queue, QueueEvents } = require("bullmq");
 
 // ── Redis Connection (supports Railway REDIS_URL and local host/port) ──
 function getRedisConnection() {
+    console.log("REDIS_URL:", process.env.REDIS_URL ? "SET" : "NOT SET");
     if (process.env.REDIS_URL) {
         return { url: process.env.REDIS_URL };
     }
