@@ -1,0 +1,42 @@
+name: 'Smart Code Review AI'
+description: 'AI-powered code review bot that analyzes PRs and posts review comments'
+author: 'mehulkumar06'
+
+branding:
+  icon: 'code'
+  color: 'blue'
+
+inputs:
+  github-token:
+    description: 'GitHub token for posting comments'
+    required: true
+    default: ${{ github.token }}
+  
+  api-url:
+    description: 'URL of your CodeReview AI backend'
+    required: true
+    default: 'https://smart-code-review-platform-production.up.railway.app'
+  
+  min-score:
+    description: 'Minimum score to pass (0-100). PR fails if score is below this.'
+    required: false
+    default: '60'
+  
+  fail-on-issues:
+    description: 'Fail the action if high severity issues are found'
+    required: false
+    default: 'true'
+
+outputs:
+  score:
+    description: 'Overall code quality score (0-100)'
+  
+  passed:
+    description: 'Whether the review passed (true/false)'
+  
+  issues-count:
+    description: 'Number of issues found'
+
+runs:
+  using: 'node20'
+  main: 'index.js'

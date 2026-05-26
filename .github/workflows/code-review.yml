@@ -1,0 +1,25 @@
+name: Smart Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      checks: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Smart Code Review AI
+        uses: ./action
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          api-url: 'https://smart-code-review-platform-production.up.railway.app'
+          min-score: '60'
+          fail-on-issues: 'true'
