@@ -2,10 +2,20 @@ require("dotenv").config();
 const { Worker } = require("bullmq");
 const { processPullRequest } = require("./services/prReviewService");
 
-const connection = {
-    host: process.env.REDIS_HOST || "127.0.0.1",
-    port: process.env.REDIS_PORT || 6379,
-};
+// ── Use same Redis connection as queueService ──────────────────
+function getRedisConnection() {
+    if (process.env.REDIS_URL) {
+        console.log("✅ Using REDIS_URL");
+        return { url: process.env.REDIS_URL };
+    }
+    console.log("⚠️ Using local Redis host/port");
+    return {
+        host: process.env.REDIS_HOST || "127.0.0.1",
+        port: parseInt(process.env.REDIS_PORT) || 6379,
+    };
+}
+
+const connection = getRedisConnection();
 
 console.log("🔧 Worker starting...");
 
@@ -18,7 +28,7 @@ const worker = new Worker(
     },
     {
         connection,
-        concurrency: 3,   // process up to 3 PRs simultaneously
+        concurrency: 3,
     }
 );
 
@@ -31,7 +41,7 @@ worker.on("failed", (job, err) => {
 });
 
 worker.on("error", (err) => {
-    console.error("Worker error:", err);
+    console.error("Worker error:", err.message);
 });
 
 console.log("✅ Worker ready — listening for PR review jobs");
