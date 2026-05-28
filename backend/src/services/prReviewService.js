@@ -40,20 +40,13 @@ async function processPullRequest(payload) {
     const app     = getGitHubApp();
     const octokit = await app.getInstallationOctokit(installId);
 
-    // Log what methods are available for debugging
     console.log("   Octokit keys:", Object.keys(octokit).join(", "));
 
     try {
-        // Step A — Create pending check run
-        const checkRun = await createCheckRun(
-            octokit, owner, repoName, headSha
-        );
+        const checkRun = await createCheckRun(octokit, owner, repoName, headSha);
         console.log(`   ✅ Check run created: ${checkRun.data.id}`);
 
-        // Step B — Fetch changed files
-        const files = await getChangedFiles(
-            octokit, owner, repoName, prNumber
-        );
+        const files = await getChangedFiles(octokit, owner, repoName, prNumber);
         console.log(`   📄 Changed files: ${files.length}`);
 
         if (files.length === 0) {
@@ -61,18 +54,15 @@ async function processPullRequest(payload) {
                 octokit, owner, repoName, checkRun.data.id,
                 "success", 100, "No code files changed", "Nothing to review."
             );
-            return;
+            return { score: 100, issues: [], summary: "No code files changed.", passed: true };
         }
 
-        // Step C — Analyze
         const analysis = await analyzeChangedFiles(files, pr, repo);
         console.log(`   🧠 Score: ${analysis.score}`);
 
-        // Step D — Post comment
         await postPRComment(octokit, owner, repoName, prNumber, analysis);
         console.log(`   💬 Comment posted`);
 
-        // Step E — Complete check run
         const passed = analysis.score >= 60;
         await completeCheckRun(
             octokit, owner, repoName, checkRun.data.id,
@@ -85,6 +75,14 @@ async function processPullRequest(payload) {
         );
         console.log(`   ${passed ? "✅ PASSED" : "❌ FAILED"}`);
 
+        // ── Return for BullMQ job result storage ──────────────────
+        return {
+            score:    analysis.score,
+            issues:   analysis.issues,
+            summary:  analysis.summary,
+            passed,
+        };
+
     } catch (err) {
         console.error("PR review failed:", err.message);
         console.error(err.stack);
@@ -92,7 +90,6 @@ async function processPullRequest(payload) {
 }
 
 async function createCheckRun(octokit, owner, repo, headSha) {
-    // Try both octokit.rest and direct octokit
     const api = octokit.rest || octokit;
     return api.checks.create({
         owner,
@@ -132,8 +129,7 @@ async function getChangedFiles(octokit, owner, repo, prNumber) {
     const codeExtensions = [
         ".js", ".ts", ".jsx", ".tsx", ".py",
         ".java", ".go", ".rs", ".cpp", ".c",
-        ".cs", ".php", ".rb", ".swift", ".kt",
-        ".md"
+        ".cs", ".php", ".rb", ".swift", ".kt", ".md"
     ];
 
     return files.filter(f =>
@@ -143,7 +139,6 @@ async function getChangedFiles(octokit, owner, repo, prNumber) {
 }
 
 async function analyzeChangedFiles(files, pr, repo) {
-    const https  = require("https");
     const apiKey = process.env.GROQ_API_KEY;
 
     const filesSummary = files
@@ -186,6 +181,7 @@ Respond ONLY with valid JSON, no extra text:
     });
 
     return new Promise((resolve, reject) => {
+        const https = require("https");
         const options = {
             hostname: "api.groq.com",
             path:     "/openai/v1/chat/completions",
@@ -197,7 +193,7 @@ Respond ONLY with valid JSON, no extra text:
             },
         };
 
-        const req = require("https").request(options, res => {
+        const req = https.request(options, res => {
             let data = "";
             res.on("data", chunk => { data += chunk; });
             res.on("end", () => {
