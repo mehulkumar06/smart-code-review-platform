@@ -1,4 +1,5 @@
 const { App } = require("@octokit/app");
+const { sendNotifications } = require("./notificationService");
 const { Octokit } = require("@octokit/core");
 const { restEndpointMethods } = require("@octokit/plugin-rest-endpoint-methods");
 
@@ -74,6 +75,30 @@ async function processPullRequest(payload) {
             analysis.summary
         );
         console.log(`   ${passed ? "✅ PASSED" : "❌ FAILED"}`);
+
+        // ── Send notifications ─────────────────────────────────────
+        await sendNotifications({
+            repo:     `${owner}/${repoName}`,
+            prNumber,
+            prTitle:  pr.title,
+            score:    analysis.score,
+            issues:   analysis.issues,
+            strengths: analysis.strengths,
+            summary:  analysis.summary,
+            passed,
+        });
+
+        // ── Send notifications ─────────────────────────────────────
+        await sendNotifications({
+            repo:     `${owner}/${repoName}`,
+            prNumber,
+            prTitle:  pr.title,
+            score:    analysis.score,
+            issues:   analysis.issues,
+            strengths: analysis.strengths,
+            summary:  analysis.summary,
+            passed,
+        });
 
         // ── Return for BullMQ job result storage ──────────────────
         return {
