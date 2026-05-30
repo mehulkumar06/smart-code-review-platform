@@ -58,6 +58,7 @@ export default function Dashboard({ t, mobile }) {
 
   return (
     <div>
+
       {/* Header */}
       <div style={{ marginBottom: 28 }}>
         <h2 style={{ fontFamily: "'Manrope',sans-serif", fontSize: 22, fontWeight: 800, letterSpacing: "-0.5px", color: t.text, margin: "0 0 6px" }}>
@@ -68,12 +69,32 @@ export default function Dashboard({ t, mobile }) {
         </p>
       </div>
 
+      {/* Install Banner */}
+      <div style={{ background: t.tealDim, border: `1px solid rgba(13,148,136,0.2)`, borderRadius: 14, padding: "16px 20px", marginBottom: 20, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
+        <div>
+          <div style={{ fontSize: 14, fontWeight: 600, color: t.teal, marginBottom: 4 }}>
+            🔌 Install on any GitHub repo
+          </div>
+          <div style={{ fontSize: 12, color: t.sub }}>
+            Add AI code reviews to any repository in one click
+          </div>
+        </div>
+        <a
+          href="https://github.com/apps/smart-code-review-platform/installations/new"
+          target="_blank"
+          rel="noreferrer"
+          style={{ padding: "8px 18px", borderRadius: 8, background: "linear-gradient(135deg,#0d9488,#0f766e)", color: "#fff", fontSize: 13, fontWeight: 600, textDecoration: "none", whiteSpace: "nowrap" }}
+        >
+          Install App →
+        </a>
+      </div>
+
       {/* Stats Cards */}
       <div style={{ display: "grid", gridTemplateColumns: mobile ? "1fr 1fr" : "repeat(4, 1fr)", gap: 12, marginBottom: 20 }}>
         {[
-          { label: "Total Reviews", value: stats?.total || 0,           color: "#0d9488" },
-          { label: "Passed",        value: stats?.passed || 0,          color: "#10b981" },
-          { label: "Failed",        value: stats?.failed || 0,          color: "#f43f5e" },
+          { label: "Total Reviews", value: stats?.total || 0,            color: "#0d9488" },
+          { label: "Passed",        value: stats?.passed || 0,           color: "#10b981" },
+          { label: "Failed",        value: stats?.failed || 0,           color: "#f43f5e" },
           { label: "Avg Score",     value: `${stats?.avgScore || 0}/100`, color: "#f59e0b" },
         ].map(({ label, value, color }) => (
           <div key={label} style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 14, padding: "16px 18px" }}>
@@ -96,10 +117,10 @@ export default function Dashboard({ t, mobile }) {
           </div>
           <div style={{ display: "flex", gap: 32, flexWrap: "wrap" }}>
             {[
-              { label: "Waiting",   value: queueStats.waiting,   color: t.sub      },
-              { label: "Active",    value: queueStats.active,    color: "#f59e0b"  },
-              { label: "Completed", value: queueStats.completed, color: "#10b981"  },
-              { label: "Failed",    value: queueStats.failed,    color: "#f43f5e"  },
+              { label: "Waiting",   value: queueStats.waiting,   color: t.sub     },
+              { label: "Active",    value: queueStats.active,    color: "#f59e0b" },
+              { label: "Completed", value: queueStats.completed, color: "#10b981" },
+              { label: "Failed",    value: queueStats.failed,    color: "#f43f5e" },
             ].map(({ label, value, color }) => (
               <div key={label}>
                 <div style={{ fontSize: 11, color: t.sub, textTransform: "uppercase", letterSpacing: "0.8px", marginBottom: 4 }}>
@@ -127,10 +148,7 @@ export default function Dashboard({ t, mobile }) {
               <XAxis dataKey="name" tick={{ fontSize: 11, fill: t.sub }} />
               <YAxis domain={[0, 100]} tick={{ fontSize: 11, fill: t.sub }} />
               <Tooltip
-                contentStyle={{
-                  background: t.card, border: `1px solid ${t.border}`,
-                  borderRadius: 10, fontSize: 12, color: t.text,
-                }}
+                contentStyle={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 10, fontSize: 12, color: t.text }}
               />
               <Line
                 type="monotone" dataKey="score"
@@ -159,11 +177,7 @@ export default function Dashboard({ t, mobile }) {
               <thead>
                 <tr style={{ borderBottom: `1px solid ${t.border}` }}>
                   {["Repository", "PR", "Score", "Issues", "Status", "Date"].map(h => (
-                    <th key={h} style={{
-                      textAlign: "left", padding: "8px 12px",
-                      fontSize: 11, fontWeight: 600, color: t.sub,
-                      textTransform: "uppercase", letterSpacing: "0.8px",
-                    }}>
+                    <th key={h} style={{ textAlign: "left", padding: "8px 12px", fontSize: 11, fontWeight: 600, color: t.sub, textTransform: "uppercase", letterSpacing: "0.8px" }}>
                       {h}
                     </th>
                   ))}
@@ -176,20 +190,14 @@ export default function Dashboard({ t, mobile }) {
                     onMouseOver={e => e.currentTarget.style.background = t.cardAlt}
                     onMouseOut={e => e.currentTarget.style.background = "transparent"}
                   >
-                    <td style={{ padding: "10px 12px", color: t.text, fontWeight: 500 }}>
-                      {item.repo}
-                    </td>
-                    <td style={{ padding: "10px 12px", color: t.sub }}>
-                      #{item.prNumber}
-                    </td>
+                    <td style={{ padding: "10px 12px", color: t.text, fontWeight: 500 }}>{item.repo}</td>
+                    <td style={{ padding: "10px 12px", color: t.sub }}>#{item.prNumber}</td>
                     <td style={{ padding: "10px 12px" }}>
                       <span style={{ color: scoreColor(item.score), fontWeight: 700, fontFamily: "'Manrope',sans-serif" }}>
                         {item.score}/100
                       </span>
                     </td>
-                    <td style={{ padding: "10px 12px", color: t.sub }}>
-                      {item.issues}
-                    </td>
+                    <td style={{ padding: "10px 12px", color: t.sub }}>{item.issues}</td>
                     <td style={{ padding: "10px 12px" }}>
                       <span style={{
                         fontSize: 11, fontWeight: 600, padding: "3px 8px", borderRadius: 999,
@@ -210,6 +218,7 @@ export default function Dashboard({ t, mobile }) {
           </div>
         )}
       </div>
+
     </div>
   );
 }

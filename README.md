@@ -1,306 +1,149 @@
-# 🚀 Smart Code Review Platform
+# 🤖 Smart Code Review Platform
 
-An AI-powered GitHub Repository Analyzer that evaluates repository structure, detects issues, provides intelligent insights, and generates downloadable PDF reports.
+An AI-powered code review CI/CD bot that automatically analyzes GitHub Pull Requests and posts detailed review comments.
 
-Built as a **full-stack developer tool** to simulate real-world code review workflows.
-
----
-
-# 🌐 Live Demo (Coming Soon)
-
-Frontend: _To be deployed_  
-Backend: _To be deployed_
+🚀 **Live Demo:** https://smart-code-review-platform-kappa.vercel.app
 
 ---
 
-# 📸 Screenshots
+## ✨ Features
 
-## 🏠 Homepage
-
-![Homepage]() 
-
----
-
-## 📊 Repository Analysis Dashboard
-
-![Analysis]()
-
----
-
-## 📁 File Insights
-
-![Insights]()
+- **GitHub App** — registers as a real GitHub App, listens to PR webhooks
+- **AI Code Review** — analyzes PR diffs using Groq LLaMA 3.3 70B
+- **PR Comments** — posts formatted review comments directly on PRs
+- **Check Status** — shows pass/fail status on each PR
+- **Redis + BullMQ** — async job queue with automatic retries
+- **GitHub Action** — one-line workflow integration for any repo
+- **Dashboard** — PR history, score trends, queue stats
+- **Email Notifications** — review summary via Nodemailer
+- **Slack Notifications** — instant alerts to your Slack channel
+- **Docker** — fully containerized with Docker Compose
+- **Dark/Light Mode** — polished React frontend
 
 ---
 
-## ⚠️ Issues & Severity Detection
-
-![Issues](screenshots/issues.png)
-
----
-
-## 📄 PDF Report Export
-
-![PDF](screenshots/pdf.png)
+## 🏗️ Architecture
+GitHub PR → Railway Backend → Redis Queue → Railway Worker
+↓
+Groq AI Analysis
+↓
+PR Comment + Check Status + Notifications
 
 ---
 
-# ✨ Features
+## 🛠️ Tech Stack
 
-## 🔍 GitHub Repository Analysis
-
-- Analyze any public GitHub repository
-- Fetch repository metadata
-- Detect language and project type
-- Recursive file scanning
-
----
-
-## 📁 Smart File Insights
-
-Automatically detects:
-
-- Python files (.py)
-- JavaScript files (.js)
-- CSV datasets (.csv)
-- Jupyter notebooks (.ipynb)
-- JSON files
-
-Displays:
-
-- File counts
-- File names
-- File previews
-- Folder structure insights
+| Layer | Technology |
+|-------|-----------|
+| Frontend | React, Recharts, html2canvas |
+| Backend | Node.js, Express |
+| AI | Groq LLaMA 3.3 70B |
+| Queue | Redis + BullMQ |
+| Auth | GitHub App |
+| Deploy | Railway (backend), Vercel (frontend) |
+| CI/CD | GitHub Actions |
+| Notifications | Nodemailer, Slack Webhooks |
 
 ---
 
-## ⚠️ Intelligent Issue Detection
+## 🚀 Getting Started
 
-Severity-based issue system:
+### Prerequisites
+- Node.js 18+
+- Docker Desktop
+- GitHub App credentials
+- Groq API key
 
-- 🔴 High Severity  
-- 🟡 Medium Severity  
-- 🟢 Low Severity  
-
-Detects:
-
-- Missing README
-- Poor folder structure
-- Too many root files
-- Documentation issues
-
----
-
-## 📊 Project Health Meter
-
-Visual indicators:
-
-- Overall Score (0–100)
-- Health Status
-- Category Scores:
-  - Structure
-  - Documentation
-  - Code Quality
-
----
-
-## 🧠 AI Code Review System
-
-Generates:
-
-- Repository Summary
-- Improvement Suggestions
-- Code Quality Feedback
-- Final Verdict
-
-Includes fallback review when AI quota is unavailable.
-
----
-
-## 📄 Export to PDF
-
-Generate professional reports including:
-
-- Repository details
-- Project score
-- Issues detected
-- File insights
-- AI review summary
-- Timestamp
-
----
-
-## 🌙 Dark Mode Support
-
-Modern UI with:
-
-- Light Mode
-- Dark Mode
-- Improved contrast styling
-- Interactive buttons
-
----
-
-## 🕘 Analysis History
-
-Stores previously analyzed repositories for quick access.
-
----
-
-# 🛠️ Tech Stack
-
-## Frontend
-
-- React.js
-- JavaScript
-- HTML5
-- CSS3
-
-Libraries Used:
-
-- Axios
-- html2canvas
-- jsPDF
-
----
-
-## Backend
-
-- Node.js
-- Express.js
-
----
-
-## APIs & Services
-
-- GitHub REST API
-- OpenAI API (optional AI review)
-
----
-
-# 🧪 Tested Repositories
-
-This system was tested using real-world repositories:
-
-### 📊 Data Analysis Project
-
-Retail Sales Analysis
-
-Includes:
-
-- Python scripts
-- CSV datasets
-- Data analysis workflow
-
----
-
-### 🛒 Full Stack Project
-
-Shop Swift
-
-Includes:
-
-- JavaScript frontend
-- Backend APIs
-- Folder-based structure
-
----
-
-### 🎬 Frontend UI Project
-
-Netflix Clone
-
-Includes:
-
-- UI components
-- JavaScript frontend logic
-
----
-
-# ⚙️ Installation Guide
-
-## Clone Repository
+### Local Development
 
 ```bash
+# Clone the repo
 git clone https://github.com/mehulkumar06/smart-code-review-platform.git
 cd smart-code-review-platform
 
-Backend Setup
-
+# Install backend dependencies
 cd backend
-
 npm install
 
-npm run dev
+# Set up environment variables
+cp .env.example .env
+# Fill in your values
 
-Backend runs on:
-    http://localhost:5000
+# Start with Docker Compose
+docker-compose up --build
 
-Frontend Setup
+## 🔌 Install on Your Repo
 
-cd frontend
+[![Install App](https://img.shields.io/badge/Install-GitHub%20App-0d9488?style=for-the-badge&logo=github)](https://github.com/apps/YOUR-APP-SLUG/installations/new)
 
-npm install
+```
 
-npm start
+### Environment Variables
 
-Frontend runs on:
-    http://localhost:3000
+```env
+GITHUB_APP_ID=
+GITHUB_APP_NAME=
+GITHUB_WEBHOOK_SECRET=
+GITHUB_PRIVATE_KEY=
+GITHUB_TOKEN=
+GROQ_API_KEY=
+REDIS_URL=
+EMAIL_USER=
+EMAIL_PASS=
+EMAIL_TO=
+SLACK_WEBHOOK_URL=
+```
 
-🔑 Environment Variables
+---
 
-Create .env inside:
+## 📊 Dashboard
 
-backend/
+The dashboard shows:
+- Total PR reviews, pass rate, average score
+- Queue status (waiting, active, completed, failed)
+- Score trend chart over time
+- Full PR review history table
 
-Add:
+---
 
-GITHUB_TOKEN=your_github_token
-OPENAI_API_KEY=your_openai_key_optional
-PORT=5000
+## 🔧 GitHub Action Usage
 
-📊 Project Architecture
+Add to any repo's `.github/workflows/review.yml`:
 
+```yaml
+- uses: mehulkumar06/smart-code-review-platform@v1
+  with:
+    github-token: ${{ secrets.GITHUB_TOKEN }}
+    min-score: '60'
+    fail-on-issues: 'true'
+```
+
+---
+
+## 📁 Project Structure
 smart-code-review-platform/
-│
-├── frontend/
-│   ├── components/
-│   ├── pages/
-│   ├── styles/
-│   └── App.js
-│
+├── action/              # GitHub Action
 ├── backend/
-│   ├── controllers/
-│   ├── services/
-│   ├── routes/
-│   └── server.js
-│
-├── screenshots/
-│
-└── README.md
+│   ├── src/
+│   │   ├── controllers/ # Request handlers
+│   │   ├── routes/      # API routes
+│   │   └── services/    # Business logic
+│   ├── Dockerfile
+│   └── railway.toml
+├── frontend/
+│   └── src/
+│       ├── App.js       # Main app
+│       ├── Dashboard.js # Dashboard page
+│       └── Login.js     # Login page
+└── docker-compose.yml
 
-🎯 Key Highlights
+---
 
-✔ Full-stack application
-✔ GitHub API integration
-✔ Recursive repository scanning
-✔ Severity-based issue detection
-✔ AI-powered insights
-✔ PDF export functionality
-✔ Responsive UI with dark mode
+## 👨‍💻 Built by
 
-🚀 Future Improvements
+**Mehul Kumar** — [GitHub](https://github.com/mehulkumar06)
 
-Planned enhancements:
-
-Live deployment
-Multi-repository comparison
-Advanced code quality metrics
-Multi-page PDF reports
-GitHub authentication
-Performance analysis tools
-
-// test for env injecting 0 //
-# Railway deployment test
-test github action
+Then push:
+bashgit add README.md
+git commit -m "docs: update README with full project documentation"
+git push origin main
